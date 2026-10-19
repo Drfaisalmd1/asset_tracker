@@ -3,29 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Investment Portfolio Portal</title>
+  <title>Investment Portfolio Portal & Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen py-10 px-4">
 
-  <div class="max-w-2xl mx-auto">
+  <div class="max-w-4xl mx-auto">
     <!-- Header -->
     <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Investment Tracker Portal</h1>
-      <p class="text-slate-500 mt-1">Log your monthly valuations and cash inflows directly to Google Sheets</p>
+      <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Investment Portfolio Portal</h1>
+      <p class="text-slate-500 mt-1">Track your net worth, view asset performance, and log entries directly to Google Sheets</p>
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="flex justify-center bg-slate-200 p-1 rounded-xl mb-6 shadow-inner">
-      <button onclick="switchTab('valuation')" id="btn-valuation" class="flex-1 py-2.5 text-sm font-semibold rounded-lg bg-white text-blue-600 shadow-sm transition-all">Monthly Valuation Check-In</button>
-      <button onclick="switchTab('cashflow')" id="btn-cashflow" class="flex-1 py-2.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Log Cash Inflow / Deposit</button>
+    <div class="flex flex-wrap justify-center bg-slate-200 p-1 rounded-xl mb-8 shadow-inner gap-1">
+      <button onclick="switchTab('dashboard')" id="btn-dashboard" class="flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg bg-white text-blue-600 shadow-sm transition-all">Portfolio Dashboard</button>
+      <button onclick="switchTab('valuation')" id="btn-valuation" class="flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Log Valuation</button>
+      <button onclick="switchTab('cashflow')" id="btn-cashflow" class="flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Log Cash Inflow</button>
     </div>
 
-    <!-- Hidden Iframe to prevent redirect and handle POST submission silently -->
+    <!-- Hidden Iframe for silent POST submissions -->
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="handleResponse()"></iframe>
 
-    <!-- Form 1: Valuation Check-In -->
-    <div id="section-valuation" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+    <!-- TAB 1: Portfolio Dashboard View -->
+    <div id="section-dashboard" class="space-y-6">
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <p class="text-sm font-medium text-slate-500">Total Invested Capital</p>
+          <p class="text-2xl font-bold text-slate-900 mt-1">£15,266.00</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <p class="text-sm font-medium text-slate-500">Current Market Value</p>
+          <p class="text-2xl font-bold text-slate-900 mt-1">£13,950.00</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <p class="text-sm font-medium text-slate-500">Overall Profit / Loss</p>
+          <p class="text-2xl font-bold text-rose-600 mt-1">-£1,316.00 (-8.6%)</p>
+        </div>
+      </div>
+
+      <!-- Asset Breakdown Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+          <h2 class="text-lg font-semibold text-slate-900">Holdings Breakdown</h2>
+          <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">Live Snapshot</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider font-semibold border-b border-slate-100">
+                <th class="py-3 px-6">Asset / Platform</th>
+                <th class="py-3 px-6">Category</th>
+                <th class="py-3 px-6">Total Invested</th>
+                <th class="py-3 px-6">Current Value</th>
+                <th class="py-3 px-6">Net Profit / Loss</th>
+                <th class="py-3 px-6">ROI (%)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-sm">
+              <tr>
+                <td class="py-4 px-6 font-medium text-slate-900">Wahed Invest</td>
+                <td class="py-4 px-6 text-slate-500">Halal Portfolio</td>
+                <td class="py-4 px-6">£8,766.00</td>
+                <td class="py-4 px-6">£6,800.00</td>
+                <td class="py-4 px-6 text-rose-600 font-medium">-£1,966.00</td>
+                <td class="py-4 px-6 text-rose-600 font-medium">-22.4%</td>
+              </tr>
+              <tr>
+                <td class="py-4 px-6 font-medium text-slate-900">Bitcoin (BTC)</td>
+                <td class="py-4 px-6 text-slate-500">Crypto</td>
+                <td class="py-4 px-6">£2,500.00</td>
+                <td class="py-4 px-6">£3,500.00</td>
+                <td class="py-4 px-6 text-emerald-600 font-medium">+£1,000.00</td>
+                <td class="py-4 px-6 text-emerald-600 font-medium">+40.0%</td>
+              </tr>
+              <tr>
+                <td class="py-4 px-6 font-medium text-slate-900">Trading 212</td>
+                <td class="py-4 px-6 text-slate-500">Stocks</td>
+                <td class="py-4 px-6">£4,000.00</td>
+                <td class="py-4 px-6">£3,650.00</td>
+                <td class="py-4 px-6 text-rose-600 font-medium">-£350.00</td>
+                <td class="py-4 px-6 text-rose-600 font-medium">-8.8%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Embed Sheet Link Card -->
+      <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+          <h3 class="text-blue-900 font-semibold text-base">Want to view formulas and full multi-tab history?</h3>
+          <p class="text-blue-700 text-sm mt-0.5">Open your underlying Google Sheets workbook anytime to inspect detailed historical logs.</p>
+        </div>
+        <a href="https://docs.google.com/spreadsheets/d/1d-dy1rRoTLGDDEHpz-9cCkMGeiqpUTIjFUnWvqnfli0/edit" target="_blank" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-all whitespace-nowrap">
+          Open Google Sheet ↗
+        </a>
+      </div>
+    </div>
+
+    <!-- TAB 2: Valuation Check-In Form -->
+    <div id="section-valuation" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 hidden">
       <h2 class="text-xl font-semibold text-slate-900 mb-4">Monthly Valuation Check-In</h2>
       <form id="valForm" action="https://script.google.com/macros/s/AKfycbwNaYqBrciSPe8cslMlDWGmVcKKXTp4p6CquKzIF7g3yZE-uRtnZyFc77rtFhZ0QwL68Q/exec" method="POST" target="hidden_iframe" class="space-y-5">
         <input type="hidden" name="type" value="valuation">
@@ -37,118 +116,4 @@
 
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1.5">Asset / Platform</label>
-          <select name="asset" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50">
-            <option value="Wahed Invest">Wahed Invest</option>
-            <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
-            <option value="Trading 212">Trading 212</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Current Market Value (£)</label>
-          <input type="number" step="0.01" name="currentValue" placeholder="e.g. 6100.00" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50">
-        </div>
-
-        <button type="submit" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all">
-          Submit Valuation Check-In
-        </button>
-      </form>
-    </div>
-
-    <!-- Form 2: Cash Flow Inflow -->
-    <div id="section-cashflow" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 hidden">
-      <h2 class="text-xl font-semibold text-slate-900 mb-4">Log Capital Inflow / Deposit</h2>
-      <form id="cashForm" action="https://script.google.com/macros/s/AKfycbwNaYqBrciSPe8cslMlDWGmVcKKXTp4p6CquKzIF7g3yZE-uRtnZyFc77rtFhZ0QwL68Q/exec" method="POST" target="hidden_iframe" class="space-y-5">
-        <input type="hidden" name="type" value="cash_flow">
-        
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Deposit Date</label>
-          <input type="date" name="date" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Asset / Platform</label>
-          <select name="asset" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50">
-            <option value="Wahed Invest">Wahed Invest</option>
-            <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
-            <option value="Trading 212">Trading 212</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1.5">Category</label>
-            <select name="category" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50">
-              <option value="ETFs / Stocks">ETFs / Stocks</option>
-              <option value="Crypto">Crypto</option>
-              <option value="Shares">Shares</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1.5">Transaction Type</label>
-            <select name="flowType" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50">
-              <option value="Addition">Addition</option>
-              <option value="Initial">Initial</option>
-              <option value="Withdrawal">Withdrawal</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Amount (£)</label>
-          <input type="number" step="0.01" name="amount" placeholder="e.g. 500.00" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Notes (Optional)</label>
-          <input type="text" name="notes" placeholder="e.g. Monthly top-up" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50">
-        </div>
-
-        <button type="submit" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all">
-          Log Cash Flow Deposit
-        </button>
-      </form>
-    </div>
-
-    <!-- Success Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 font-medium">
-      Successfully logged to your Google Sheet! 🎉
-    </div>
-  </div>
-
-  <script>
-    let submittalActive = false;
-
-    function switchTab(tab) {
-      if (tab === 'valuation') {
-        document.getElementById('section-valuation').classList.remove('hidden');
-        document.getElementById('section-cashflow').classList.add('hidden');
-        document.getElementById('btn-valuation').className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg bg-white text-blue-600 shadow-sm transition-all';
-        document.getElementById('btn-cashflow').className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
-      } else {
-        document.getElementById('section-cashflow').classList.remove('hidden');
-        document.getElementById('section-valuation').classList.add('hidden');
-        document.getElementById('btn-cashflow').className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg bg-white text-blue-600 shadow-sm transition-all';
-        document.getElementById('btn-valuation').className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
-      }
-    }
-
-    document.getElementById('valForm').onsubmit = () => { submittalActive = true; };
-    document.getElementById('cashForm').onsubmit = () => { submittalActive = true; };
-
-    function handleResponse() {
-      if (submittalActive) {
-        submittalActive = false;
-        document.querySelectorAll('form').forEach(f => f.reset());
-        
-        // Show success toast
-        const toast = document.getElementById('toast');
-        toast.classList.remove('translate-y-20', 'opacity-0');
-        setTimeout(() => {
-          toast.classList.add('translate-y-20', 'opacity-0');
-        }, 3500);
-      }
-    }
-  </script>
-</body>
-</html>
+          <select name="asset" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300
