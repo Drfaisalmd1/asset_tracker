@@ -6,7 +6,7 @@
   <title>Investment Portfolio Portal & Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen py-10 px-4">
+<body class="bg-slate-50 text-slate-800 min-h-screen py-10 px-4" onload="fetchDashboardData()">
 
   <div class="max-w-4xl mx-auto">
     <!-- Header -->
@@ -31,15 +31,15 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <p class="text-sm font-medium text-slate-500">Total Invested Capital</p>
-          <p class="text-2xl font-bold text-slate-900 mt-1">£15,266.00</p>
+          <p id="card-invested" class="text-2xl font-bold text-slate-900 mt-1">Loading...</p>
         </div>
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <p class="text-sm font-medium text-slate-500">Current Market Value</p>
-          <p class="text-2xl font-bold text-slate-900 mt-1">£13,950.00</p>
+          <p id="card-value" class="text-2xl font-bold text-slate-900 mt-1">Loading...</p>
         </div>
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <p class="text-sm font-medium text-slate-500">Overall Profit / Loss</p>
-          <p class="text-2xl font-bold text-rose-600 mt-1">-£1,316.00 (-8.6%)</p>
+          <p id="card-pl" class="text-2xl font-bold text-slate-900 mt-1">Loading...</p>
         </div>
       </div>
 
@@ -47,7 +47,7 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
           <h2 class="text-lg font-semibold text-slate-900">Holdings Breakdown</h2>
-          <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">Live Snapshot</span>
+          <button onclick="fetchDashboardData()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer">🔄 Refresh Live Data</button>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
@@ -61,30 +61,9 @@
                 <th class="py-3 px-6">ROI (%)</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-sm">
+            <tbody id="holdings-tbody" class="divide-y divide-slate-100 text-sm">
               <tr>
-                <td class="py-4 px-6 font-medium text-slate-900">Wahed Invest</td>
-                <td class="py-4 px-6 text-slate-500">Halal Portfolio</td>
-                <td class="py-4 px-6">£8,766.00</td>
-                <td class="py-4 px-6">£6,800.00</td>
-                <td class="py-4 px-6 text-rose-600 font-medium">-£1,966.00</td>
-                <td class="py-4 px-6 text-rose-600 font-medium">-22.4%</td>
-              </tr>
-              <tr>
-                <td class="py-4 px-6 font-medium text-slate-900">Bitcoin (BTC)</td>
-                <td class="py-4 px-6 text-slate-500">Crypto</td>
-                <td class="py-4 px-6">£2,500.00</td>
-                <td class="py-4 px-6">£3,500.00</td>
-                <td class="py-4 px-6 text-emerald-600 font-medium">+£1,000.00</td>
-                <td class="py-4 px-6 text-emerald-600 font-medium">+40.0%</td>
-              </tr>
-              <tr>
-                <td class="py-4 px-6 font-medium text-slate-900">Trading 212</td>
-                <td class="py-4 px-6 text-slate-500">Stocks</td>
-                <td class="py-4 px-6">£4,000.00</td>
-                <td class="py-4 px-6">£3,650.00</td>
-                <td class="py-4 px-6 text-rose-600 font-medium">-£350.00</td>
-                <td class="py-4 px-6 text-rose-600 font-medium">-8.8%</td>
+                <td colspan="6" class="py-6 px-6 text-center text-slate-400">Fetching live data from Google Sheet...</td>
               </tr>
             </tbody>
           </table>
@@ -197,6 +176,7 @@
 
   <script>
     let submittalActive = false;
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwNaYqBrciSPe8cslMlDWGmVcKKXTp4p6CquKzIF7g3yZE-uRtnZyFc77rtFhZ0QwL68Q/exec";
 
     function switchTab(tab) {
       ['dashboard', 'valuation', 'cashflow'].forEach(t => {
@@ -205,6 +185,68 @@
       });
       document.getElementById('section-' + tab).classList.remove('hidden');
       document.getElementById('btn-' + tab).className = 'flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg bg-white text-blue-600 shadow-sm transition-all cursor-pointer';
+      
+      if (tab === 'dashboard') {
+        fetchDashboardData();
+      }
+    }
+
+    async function fetchDashboardData() {
+      try {
+        const response = await fetch(WEB_APP_URL + "?action=dashboard");
+        const json = await response.json();
+        
+        if (json.status === 'success' && json.data) {
+          const rows = json.data;
+          const assetRows = rows.slice(1, rows.length - 1);
+          const totalRow = rows[rows.length - 1];
+
+          // Update summary cards
+          if (totalRow) {
+            document.getElementById('card-invested').innerText = totalRow[2] || '£0.00';
+            document.getElementById('card-value').innerText = totalRow[3] || '£0.00';
+            
+            const pl = totalRow[4] || '£0.00';
+            const roi = totalRow[5] || '0.00%';
+            const cardPl = document.getElementById('card-pl');
+            cardPl.innerText = `${pl} (${roi})`;
+            if (pl.toString().startsWith('-')) {
+              cardPl.className = 'text-2xl font-bold text-rose-600 mt-1';
+            } else {
+              cardPl.className = 'text-2xl font-bold text-emerald-600 mt-1';
+            }
+          }
+
+          // Populate holdings table
+          const tbody = document.getElementById('holdings-tbody');
+          tbody.innerHTML = '';
+          
+          assetRows.forEach(r => {
+            const asset = r[0];
+            const category = r[1];
+            const invested = r[2];
+            const value = r[3];
+            const pl = r[4];
+            const roi = r[5];
+
+            const isNegative = pl && pl.toString().startsWith('-');
+            const colorClass = isNegative ? 'text-rose-600 font-medium' : 'text-emerald-600 font-medium';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="py-4 px-6 font-medium text-slate-900">${asset}</td>
+              <td class="py-4 px-6 text-slate-500">${category}</td>
+              <td class="py-4 px-6">${invested}</td>
+              <td class="py-4 px-6">${value}</td>
+              <td class="py-4 px-6 ${colorClass}">${pl}</td>
+              <td class="py-4 px-6 ${colorClass}">${roi}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching live dashboard data:", err);
+      }
     }
 
     document.getElementById('valForm').onsubmit = () => { submittalActive = true; };
@@ -220,6 +262,9 @@
         setTimeout(() => {
           toast.classList.add('translate-y-20', 'opacity-0');
         }, 3500);
+
+        // Refresh dashboard data after 1 second so calculations update
+        setTimeout(fetchDashboardData, 1000);
       }
     }
   </script>
