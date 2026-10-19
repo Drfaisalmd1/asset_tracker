@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Tracker Web Dashboard</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { color: #1e293b; text-align: center; }
+    .card { background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .full-width { grid-column: span 2; }
+    label { font-weight: 600; margin-bottom: 5px; display: block; font-size: 14px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+    button { background: #2563eb; color: #fff; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px; }
+    button:hover { background: #1d4ed8; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+    .tab-btn { background: #e2e8f0; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .tab-btn.active { background: #2563eb; color: white; }
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Investment Portfolio Portal</h1>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('valuation')">+ Log Valuation Check-In</button>
+    <button class="tab-btn" onclick="switchTab('cashflow')">+ Log Cash Inflow / Deposit</button>
+  </div>
+
+  <!-- Form 1: Valuation Check-In -->
+  <div id="valuation" class="card form-section active">
+    <h2>Monthly Valuation Check-In</h2>
+    <form id="valForm">
+      <div>
+        <label>Check Date</label>
+        <input type="date" id="valDate" required>
+      </div>
+      <div>
+        <label>Asset / Platform</label>
+        <select id="valAsset" required>
+          <option value="Wahed Invest">Wahed Invest</option>
+          <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+          <option value="Trading 212">Trading 212</option>
+        </select>
+      </div>
+      <div class="full-width">
+        <label>Current Market Value (£)</label>
+        <input type="number" step="0.01" id="valAmount" placeholder="e.g. 6100.00" required>
+      </div>
+      <div class="full-width">
+        <button type="submit">Submit Check-In to Google Sheets</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Form 2: Cash Flow Inflow -->
+  <div id="cashflow" class="card form-section">
+    <h2>Log Capital Inflow / Deposit</h2>
+    <form id="cashForm">
+      <div>
+        <label>Deposit Date</label>
+        <input type="date" id="cashDate" required>
+      </div>
+      <div>
+        <label>Asset / Platform</label>
+        <select id="cashAsset" required>
+          <option value="Wahed Invest">Wahed Invest</option>
+          <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+          <option value="Trading 212">Trading 212</option>
+        </select>
+      </div>
+      <div>
+        <label>Category</label>
+        <select id="cashCat">
+          <option value="ETFs / Stocks">ETFs / Stocks</option>
+          <option value="Crypto">Crypto</option>
+          <option value="Shares">Shares</option>
+        </select>
+      </div>
+      <div>
+        <label>Transaction Type</label>
+        <select id="cashType">
+          <option value="Addition">Addition</option>
+          <option value="Initial">Initial</option>
+          <option value="Withdrawal">Withdrawal</option>
+        </select>
+      </div>
+      <div>
+        <label>Amount (£)</label>
+        <input type="number" step="0.01" id="cashAmount" placeholder="e.g. 500.00" required>
+      </div>
+      <div>
+        <label>Notes</label>
+        <input type="text" id="cashNotes" placeholder="e.g. Monthly top-up">
+      </div>
+      <div class="full-width">
+        <button type="submit">Log Cash Flow to Google Sheets</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const API_URL = "YOUR_WEB_APP_URL_HERE";
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // Submit Valuation
+  document.getElementById('valForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const payload = {
+      type: 'valuation',
+      date: document.getElementById('valDate').value,
+      asset: document.getElementById('valAsset').value,
+      currentValue: parseFloat(document.getElementById('valAmount').value)
+    };
+    sendData(payload);
+  });
+
+  // Submit Cash Flow
+  document.getElementById('cashForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const payload = {
+      type: 'cash_flow',
+      date: document.getElementById('cashDate').value,
+      asset: document.getElementById('cashAsset').value,
+      category: document.getElementById('cashCat').value,
+      flowType: document.getElementById('cashType').value,
+      amount: parseFloat(document.getElementById('cashAmount').value),
+      notes: document.getElementById('cashNotes').value
+    };
+    sendData(payload);
+  });
+
+  function sendData(data) {
+    fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    }).then(() => {
+      alert('Logged successfully to your Google Sheet!');
+      document.querySelectorAll('form').forEach(f => f.reset());
+    }).catch(err => alert('Error: ' + err));
+  }
+</script>
+
+</body>
+</html>
