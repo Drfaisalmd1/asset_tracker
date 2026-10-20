@@ -198,16 +198,39 @@
         
         if (json.status === 'success' && json.data) {
           const rows = json.data;
-          const assetRows = rows.slice(1, rows.length - 1);
-          const totalRow = rows[rows.length - 1];
+          
+          // Find header row where Column B is "Asset / Platform"
+          let headerIdx = -1;
+          for (let i = 0; i < rows.length; i++) {
+            if (rows[i][1] && rows[i][1].toString().trim() === "Asset / Platform") {
+              headerIdx = i;
+              break;
+            }
+          }
+
+          if (headerIdx === -1) return;
+
+          let assetRows = [];
+          let totalRow = null;
+
+          for (let i = headerIdx + 1; i < rows.length; i++) {
+            const r = rows[i];
+            const assetCol = r[1] ? r[1].toString().trim() : "";
+            if (assetCol === "Total") {
+              totalRow = r;
+              break;
+            } else if (assetCol !== "") {
+              assetRows.push(r);
+            }
+          }
 
           // Update summary cards
           if (totalRow) {
-            document.getElementById('card-invested').innerText = totalRow[2] || '£0.00';
-            document.getElementById('card-value').innerText = totalRow[3] || '£0.00';
+            document.getElementById('card-invested').innerText = totalRow[3] || '£0.00';
+            document.getElementById('card-value').innerText = totalRow[4] || '£0.00';
             
-            const pl = totalRow[4] || '£0.00';
-            const roi = totalRow[5] || '0.00%';
+            const pl = totalRow[5] || '£0.00';
+            const roi = totalRow[6] || '0.00%';
             const cardPl = document.getElementById('card-pl');
             cardPl.innerText = `${pl} (${roi})`;
             if (pl.toString().startsWith('-')) {
@@ -222,12 +245,12 @@
           tbody.innerHTML = '';
           
           assetRows.forEach(r => {
-            const asset = r[0];
-            const category = r[1];
-            const invested = r[2];
-            const value = r[3];
-            const pl = r[4];
-            const roi = r[5];
+            const asset = r[1];
+            const category = r[2];
+            const invested = r[3];
+            const value = r[4];
+            const pl = r[5];
+            const roi = r[6];
 
             const isNegative = pl && pl.toString().startsWith('-');
             const colorClass = isNegative ? 'text-rose-600 font-medium' : 'text-emerald-600 font-medium';
@@ -263,7 +286,6 @@
           toast.classList.add('translate-y-20', 'opacity-0');
         }, 3500);
 
-        // Refresh dashboard data after 1 second so calculations update
         setTimeout(fetchDashboardData, 1000);
       }
     }
